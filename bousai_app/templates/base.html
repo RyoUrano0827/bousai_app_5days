@@ -5,7 +5,7 @@
   <title>{% block title %}防災アプリ{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body>
+<body class="{% if request.endpoint == 'index' %}home-page{% elif request.endpoint == 'login' %}auth-page{% elif request.endpoint == 'damage_report' %}report-page{% endif %}">
   <!-- ヘッダー -->
   <h1>防災アプリ</h1>
 
@@ -14,6 +14,7 @@
     <a href="/">ホーム</a> |
     <a href="/shelter_search">避難所検索</a> |
     <a href="/shelter_register">避難所登録</a> |
+    <a href="{{ url_for('damage_report') }}" class="report-nav-link">通報画面</a> |
     <a href="/board">指示・発信ボード</a>
     ｜
     {% if session.logged_in %}
@@ -26,7 +27,7 @@
   </nav>
   <hr>
 
-  <main>
+  <main class="site-main">
     <!-- ここに子テンプレートの content が入る -->
     {% block content %}{% endblock %}
   </main>

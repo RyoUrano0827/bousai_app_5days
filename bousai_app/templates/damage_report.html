@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}被害の通報 - 防災アプリ{% endblock %}
+
+{% block content %}
+<style>
+  body.report-page {
+    margin: 0;
+    background: #eef3ef;
+    color: #203a37;
+    font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+
+  .report-page > h1 {
+    margin: 0;
+    padding: 22px max(24px, calc((100% - 960px) / 2));
+    background: #15564f;
+    color: #fff;
+    font-size: 23px;
+  }
+
+  .report-page nav {
+    display: flex;
+    min-height: 54px;
+    align-items: center;
+    gap: 20px;
+    padding: 0 max(24px, calc((100% - 960px) / 2));
+    border-bottom: 1px solid #d6e1dc;
+    background: #fff;
+    color: #536864;
+    font-size: 16px;
+    flex-wrap: wrap;
+  }
+
+  .report-page nav a {
+    color: #245b53;
+    text-decoration: none;
+  }
+
+  .report-page hr { display: none; }
+
+  .report-page .site-main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 28px 24px 48px;
+  }
+
+  .phone-panel,
+  .report-form-panel {
+    padding: 24px;
+    border: 1px solid #dce6e1;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 5px 18px rgb(29 66 58 / 5%);
+  }
+
+  .phone-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: end;
+    margin-bottom: 20px;
+    border-top: 4px solid #d89a4a;
+  }
+
+  .phone-panel h2,
+  .report-form-panel h2 {
+    margin: 0 0 8px;
+    font-size: 22px;
+  }
+
+  .phone-panel p,
+  .report-intro {
+    margin: 0;
+    color: #536864;
+    line-height: 1.7;
+  }
+
+  .report-form-panel h2 { margin-bottom: 10px; }
+
+  .report-intro { margin-bottom: 22px; }
+
+  .report-field { margin: 0 0 22px; }
+
+  .report-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .report-field input,
+  .report-field select,
+  .report-field textarea,
+  .location-input-row input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 56px;
+    padding: 12px 14px;
+    border: 2px solid #9eb5ab;
+    border-radius: 5px;
+    background: #fff;
+    color: #203a37;
+    font: inherit;
+    font-size: 18px;
+  }
+
+  .report-field textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  .report-field input:focus,
+  .report-field select:focus,
+  .report-field textarea:focus,
+  .location-input-row input:focus {
+    outline: 3px solid #d89a4a;
+    outline-offset: 2px;
+  }
+
+  .field-help {
+    display: block;
+    margin-top: 6px;
+    color: #536864;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .phone-button,
+  .submit-report {
+    display: inline-flex;
+    min-height: 56px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 5px;
+    background: #15564f;
+    color: #fff;
+    font: inherit;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .phone-button { background: #b85932; }
+  .phone-button:hover { background: #9e4927; }
+  .submit-report:hover { background: #104740; }
+
+  .phone-status,
+  .form-message {
+    margin: 12px 0 0;
+    font-size: 17px;
+    line-height: 1.6;
+  }
+
+  .phone-status { grid-column: 1 / -1; }
+  .location-input-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+  .location-button,
+  .time-button {
+    min-height: 52px;
+    padding: 0 16px;
+    border: 1px solid #15564f;
+    border-radius: 5px;
+    background: #fff;
+    color: #15564f;
+    font: inherit;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .location-button:disabled { opacity: 0.65; cursor: wait; }
+  .form-message.error { color: #a43832; }
+  .form-message.success {
+    padding: 16px;
+    border-left: 4px solid #2d775c;
+    background: #e9f4ee;
+    color: #174d3b;
+  }
+
+  .submit-report { width: 100%; min-height: 64px; }
+
+  @media (max-width: 720px) {
+    .report-page > h1 { padding: 18px 20px; }
+    .report-page nav { gap: 14px; padding: 14px 20px; }
+    .report-page .site-main { padding: 20px 14px 36px; }
+    .phone-panel { grid-template-columns: minmax(0, 1fr); padding: 20px; }
+    .phone-button { width: 100%; }
+    .report-form-panel { padding: 20px; }
+    .report-field label { font-size: 19px; }
+    .location-input-row { grid-template-columns: minmax(0, 1fr); }
+    .location-button { width: 100%; }
+  }
+</style>
+
+<section class="phone-panel" aria-labelledby="phoneHeading">
+  <div>
+    <h2 id="phoneHeading">電話で本部に連絡</h2>
+    <p>ボタンを押すと本部へ電話します。</p>
+  </div>
+  <button class="phone-button" type="button">本部へ電話する</button>
+</section>
+
+<section class="report-form-panel" aria-labelledby="reportHeading">
+  <h2 id="reportHeading">被害の通報</h2>
+  <p class="report-intro">わかる範囲で入力してください。必須項目はすべて必要です。</p>
+
+  {% if error %}
+    <p class="form-message error" role="alert">{{ message }}</p>
+  {% endif %}
+  {% if success %}
+    <p class="form-message success" role="status">通報を受け付けました。本部へ内容を共有しました。受付番号: {{ report.id }}</p>
+  {% endif %}
+
+  <form method="post">
+    <div class="report-field">
+      <label for="occurredAt">発生した日時（初期値は現在時刻）</label>
+      <input type="datetime-local" id="occurredAt" name="occurred_at" value="{{ form_data.occurred_at }}" required>
+      <button class="time-button" type="button" id="useCurrentTime">現在時刻に設定</button>
+      <span class="field-help" id="timeStatus" role="status" aria-live="polite"></span>
+    </div>
+
+    <div class="report-field">
+      <label for="location">どこで発生しましたか</label>
+      <div class="location-input-row">
+        <input type="text" id="location" name="location" value="{{ form_data.location }}" placeholder="住所・施設名・近くの目印" autocomplete="street-address" required>
+        <button class="location-button" type="button" id="useCurrentLocation">現在地を取得</button>
+      </div>
+      <input type="hidden" id="latitude" name="latitude" value="{{ form_data.latitude }}">
+      <input type="hidden" id="longitude" name="longitude" value="{{ form_data.longitude }}">
+      <span class="field-help" id="locationStatus" role="status" aria-live="polite">位置情報を使うときは「現在地を取得」を押してください。住所がわからない場合は、近くの目印を追記してください。</span>
+    </div>
+
+    <div class="report-field">
+      <label for="damageType">どのような被害ですか</label>
+      <select id="damageType" name="damage_type" required>
+        <option value="">選んでください</option>
+        {% for damage_type in damage_types %}
+          <option value="{{ damage_type }}" {% if form_data.damage_type == damage_type %}selected{% endif %}>{{ damage_type }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="report-field">
+      <label for="details">被害の内容</label>
+      <textarea id="details" name="details" placeholder="何が起きているか、人数や状況などを書いてください" required>{{ form_data.details }}</textarea>
+    </div>
+
+    <div class="report-field">
+      <label for="reporter">通報した方のお名前</label>
+      <input type="text" id="reporter" name="reporter" value="{{ form_data.reporter }}" autocomplete="name" required>
+    </div>
+
+    <button class="submit-report" type="submit">内容を確認して通報する</button>
+  </form>
+</section>
+
+<script>
+  const occurredAtInput = document.getElementById('occurredAt');
+  const locationInput = document.getElementById('location');
+  const latitudeInput = document.getElementById('latitude');
+  const longitudeInput = document.getElementById('longitude');
+
+  function currentLocalTime() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    return now.toISOString().slice(0, 16);
+  }
+
+  {% if not error %}
+    occurredAtInput.value = currentLocalTime();
+  {% endif %}
+
+  document.getElementById('useCurrentTime').addEventListener('click', function () {
+    occurredAtInput.value = currentLocalTime();
+    document.getElementById('timeStatus').textContent = '現在時刻を入力しました。';
+  });
+
+  document.getElementById('useCurrentLocation').addEventListener('click', function () {
+    const button = this;
+    const status = document.getElementById('locationStatus');
+    if (!navigator.geolocation) {
+      status.textContent = 'この端末では現在地を取得できません。住所や目印を入力してください。';
+      return;
+    }
+
+    button.disabled = true;
+    status.textContent = '現在地を取得しています。';
+    navigator.geolocation.getCurrentPosition(function (position) {
+      const latitude = position.coords.latitude.toFixed(6);
+      const longitude = position.coords.longitude.toFixed(6);
+      latitudeInput.value = latitude;
+      longitudeInput.value = longitude;
+      locationInput.value = `現在地（緯度 ${latitude}, 経度 ${longitude}）`;
+      status.textContent = '現在地を入力しました。住所や近くの目印を追記できます。';
+      button.disabled = false;
+    }, function () {
+      status.textContent = '現在地を取得できませんでした。位置情報を許可するか、住所や目印を入力してください。';
+      button.disabled = false;
+    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
+  });
+
+  locationInput.addEventListener('input', function () {
+    latitudeInput.value = '';
+    longitudeInput.value = '';
+  });
+</script>
+{% endblock %}

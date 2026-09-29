@@ -1,15 +1,234 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- 避難所マップ -->
-<h2>避難所マップ</h2>
-<div id="shelterMap" style="height: 300px;"></div>
+<style>
+    body.home-page {
+        margin: 0;
+        background: #eef3ef;
+        color: #203a37;
+        font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
+    }
 
-<!-- 気象警報・注意報 -->
-<h2>青森市 気象警報・注意報</h2>
-<p>10分おきに自動更新されます。</p>
-<div id="weatherContent">
-  <p>読み込み中...</p>
+    .home-page > h1 {
+        margin: 0;
+        padding: 22px max(24px, calc((100% - 1280px) / 2));
+        background: #15564f;
+        color: #fff;
+        font-size: 23px;
+        font-weight: 700;
+    }
+
+    .home-page nav {
+        display: flex;
+        min-height: 54px;
+        align-items: center;
+        gap: 28px;
+        padding: 0 max(24px, calc((100% - 1280px) / 2));
+        border-bottom: 1px solid #d6e1dc;
+        background: #fff;
+        color: #536864;
+        font-size: 14px;
+    }
+
+    .home-page nav a {
+        color: #245b53;
+        text-decoration: none;
+    }
+
+    .home-page nav a:hover {
+        color: #c36a36;
+        text-decoration: underline;
+    }
+
+    .home-page nav .report-nav-link {
+        display: inline-flex;
+        min-height: 40px;
+        align-items: center;
+        padding: 0 14px;
+        border-radius: 4px;
+        background: #d89a4a;
+        color: #263c32;
+        font-weight: 700;
+    }
+
+    .home-page hr {
+        display: none;
+    }
+
+    .home-page .site-main {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 30px 24px 48px;
+    }
+
+    .dashboard-heading {
+        margin: 0 0 20px;
+        color: #203a37;
+        font-size: 25px;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.85fr);
+        gap: 20px;
+        align-items: stretch;
+    }
+
+    .dashboard-panel {
+        min-width: 0;
+        padding: 22px;
+        border: 1px solid #dce6e1;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 5px 18px rgb(29 66 58 / 5%);
+        animation: panel-enter 420ms ease-out both;
+    }
+
+    .dashboard-panel h2 {
+        margin: 0 0 16px;
+        font-size: 18px;
+    }
+
+    .map-panel #shelterMap {
+        height: 490px;
+        min-height: 360px;
+        overflow: hidden;
+        border: 1px solid #d6e1dc;
+        border-radius: 5px;
+        background: #e7eeea;
+    }
+
+    .damage-marker-icon {
+        border: 0;
+        background: transparent;
+    }
+
+    .damage-map-pin {
+        position: relative;
+        display: block;
+        width: 25px;
+        height: 25px;
+        border: 2px solid #fff;
+        border-radius: 50% 50% 50% 0;
+        background: #d92d20;
+        box-shadow: 0 2px 6px rgb(0 0 0 / 35%);
+        transform: rotate(-45deg);
+    }
+
+    .damage-map-pin::after {
+        position: absolute;
+        top: 7px;
+        left: 7px;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #fff;
+        content: "";
+    }
+
+    .damage-popup h3 { margin: 0 0 8px; font-size: 16px; }
+    .damage-popup p { margin: 5px 0; }
+    .damage-popup button {
+        min-height: 40px;
+        margin-top: 8px;
+        padding: 0 12px;
+        border: 0;
+        border-radius: 4px;
+        background: #15564f;
+        color: #fff;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .weather-panel {
+        border-top: 4px solid #d89a4a;
+    }
+
+    #weatherContent {
+        min-height: 160px;
+        color: #445b56;
+        line-height: 1.8;
+    }
+
+    #weatherContent p {
+        margin: 10px 0;
+    }
+
+    #weatherContent ul {
+        display: grid;
+        gap: 8px;
+        margin: 16px 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    #weatherContent li {
+        padding: 10px 12px;
+        border-left: 3px solid #d89a4a;
+        background: #fbf5e9;
+        color: #674d2d;
+    }
+
+    @keyframes panel-enter {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 760px) {
+        .home-page > h1 {
+            padding: 18px 20px;
+            font-size: 21px;
+        }
+
+        .home-page nav {
+            gap: 16px;
+            padding: 14px 20px;
+            flex-wrap: wrap;
+        }
+
+        .home-page .site-main {
+            padding: 24px 16px 36px;
+        }
+
+        .dashboard-heading {
+            font-size: 22px;
+        }
+
+        .dashboard-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .dashboard-panel {
+            padding: 18px;
+        }
+
+        .map-panel #shelterMap {
+            height: 390px;
+            min-height: 320px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .dashboard-panel {
+            animation: none;
+        }
+    }
+</style>
+
+<h2 class="dashboard-heading">防災情報</h2>
+<div class="dashboard-grid">
+    <section class="dashboard-panel map-panel" aria-labelledby="mapHeading">
+        <h2 id="mapHeading">避難所マップ</h2>
+        <div id="shelterMap" aria-label="避難所マップ"></div>
+    </section>
+
+    <section class="dashboard-panel weather-panel" aria-labelledby="weatherHeading">
+        <h2 id="weatherHeading">青森市 気象警報・注意報</h2>
+        <div id="weatherContent" aria-live="polite">
+            <p>読み込み中...</p>
+        </div>
+    </section>
 </div>
 
 <!-- Leaflet の読み込み -->
@@ -18,14 +237,100 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 地図の初期化（藤沢市周辺を中心に設定）
-    const map = L.map('shelterMap').setView([35.3390, 139.4903], 12);
+    const map = L.map('shelterMap').setView([40.8246, 140.7400], 12);
+    const damageMarkerLayer = L.layerGroup().addTo(map);
+    const canResolveReports = {{ 'true' if session.get('logged_in') else 'false' }};
+    let hasZoomedToReports = false;
 
     // OpenStreetMapタイルを追加
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         referrerPolicy: 'strict-origin-when-cross-origin'
     }).addTo(map);
+
+    function appendText(parent, tagName, text) {
+        const element = document.createElement(tagName);
+        element.textContent = text || '';
+        parent.appendChild(element);
+        return element;
+    }
+
+    function resolveReport(report, marker, button) {
+        if (!window.confirm('この被害は対応済みとして、地図のピンを外しますか？')) {
+            return;
+        }
+
+        button.disabled = true;
+        fetch(`/api/damage_reports/${encodeURIComponent(report.id)}/resolve`, {
+            method: 'POST'
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error('対応状況を保存できませんでした。');
+            }
+            return response.json();
+        }).then(() => {
+            damageMarkerLayer.removeLayer(marker);
+        }).catch(() => {
+            button.disabled = false;
+            button.textContent = '保存できませんでした。再度お試しください';
+        });
+    }
+
+    function updateDamageReports() {
+        fetch('/api/damage_reports')
+            .then(response => {
+                if (!response.ok) throw new Error('通報を取得できませんでした。');
+                return response.json();
+            })
+            .then(data => {
+                damageMarkerLayer.clearLayers();
+                const reportPoints = [];
+
+                data.reports.forEach(report => {
+                    const latitude = Number(report.latitude);
+                    const longitude = Number(report.longitude);
+                    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
+
+                    const marker = L.marker([latitude, longitude], {
+                        icon: L.divIcon({
+                            className: 'damage-marker-icon',
+                            html: '<span class="damage-map-pin"></span>',
+                            iconSize: [30, 38],
+                            iconAnchor: [15, 36],
+                            popupAnchor: [0, -32]
+                        })
+                    }).addTo(damageMarkerLayer);
+
+                    const tooltip = document.createElement('div');
+                    appendText(tooltip, 'strong', `${report.damage_type} / ${report.details}`);
+                    marker.bindTooltip(tooltip, { direction: 'top', sticky: true });
+
+                    const popup = document.createElement('div');
+                    popup.className = 'damage-popup';
+                    appendText(popup, 'h3', `${report.damage_type}の通報`);
+                    appendText(popup, 'p', `発生日時: ${report.occurred_at}`);
+                    appendText(popup, 'p', `場所: ${report.location}`);
+                    appendText(popup, 'p', `内容: ${report.details}`);
+                    if (data.can_resolve) {
+                        const button = appendText(popup, 'button', '対応済みにしてピンを外す');
+                        button.type = 'button';
+                        button.addEventListener('click', () => resolveReport(report, marker, button));
+                    }
+                    marker.bindPopup(popup);
+                    reportPoints.push([latitude, longitude]);
+                });
+
+                if (!hasZoomedToReports && reportPoints.length > 0) {
+                    if (reportPoints.length === 1) {
+                        map.setView(reportPoints[0], 15);
+                    } else {
+                        map.fitBounds(L.latLngBounds(reportPoints).pad(0.2), { maxZoom: 15 });
+                    }
+                    hasZoomedToReports = true;
+                }
+            })
+            .catch(error => console.error('被害通報の更新に失敗しました:', error));
+    }
 
     // 気象警報・注意報の自動更新機能
     function updateWeatherWarnings() {
@@ -70,6 +375,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // 初回表示＋10分（600,000ミリ秒）おきに自動更新
     updateWeatherWarnings();
     setInterval(updateWeatherWarnings, 600000);
+    updateDamageReports();
+    setInterval(updateDamageReports, 30000);
 });
 </script>
 {% endblock %}

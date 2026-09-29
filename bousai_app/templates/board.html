@@ -3,8 +3,58 @@
 {% block title %}指示・発信ボード - 防災アプリ{% endblock %}
 
 {% block content %}
+<style>
+  .damage-report-entry {
+    margin: 14px 0;
+    padding: 18px;
+    border: 1px solid #d6e1dc;
+    border-left: 4px solid #d92d20;
+    background: #fff;
+  }
+
+  .damage-report-entry.resolved {
+    border-left-color: #2d775c;
+    opacity: 0.75;
+  }
+
+  .resolve-damage-report {
+    min-height: 44px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 4px;
+    background: #15564f;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+</style>
+
 <h2>発信ボード</h2>
 <p>住民向けの発信を登録・確認できます。</p>
+
+<h3>市民からの被害通報</h3>
+{% if damage_reports %}
+<div class="damage-report-list">
+  {% for report in damage_reports %}
+  <section class="damage-report-entry{% if report.resolved %} resolved{% endif %}" data-report-id="{{ report.id }}">
+    <h4>{{ report.damage_type }} / {{ report.location }}</h4>
+    <p>{{ report.details }}</p>
+    <p>発生日時: {{ report.occurred_at }} ／ 通報者: {{ report.reporter }}</p>
+    <small>受付番号: {{ report.id }} ／ 受付時刻: {{ report.submitted_at }}</small>
+    <p class="report-resolution-status" role="status">
+      {% if report.resolved %}
+        対応済み（{{ report.resolved_at }}）
+      {% else %}
+        <button class="resolve-damage-report" type="button">対応済みにする</button>
+      {% endif %}
+    </p>
+  </section>
+  {% endfor %}
+</div>
+{% else %}
+<p>市民からの被害通報はありません。</p>
+{% endif %}
 
 <!-- 発信一覧 -->
 <h3>発信一覧</h3>
@@ -22,4 +72,29 @@
 {% else %}
 <p>登録されている指示はありません。</p>
 {% endif %}
+
+<script>
+  document.querySelectorAll('.resolve-damage-report').forEach(function (button) {
+    button.addEventListener('click', function () {
+      const entry = button.closest('.damage-report-entry');
+      const reportId = entry.dataset.reportId;
+      if (!window.confirm('この被害を対応済みにしますか？')) return;
+
+      button.disabled = true;
+      fetch(`/api/damage_reports/${encodeURIComponent(reportId)}/resolve`, {
+        method: 'POST'
+      }).then(function (response) {
+        if (!response.ok) throw new Error();
+        return response.json();
+      }).then(function () {
+        entry.classList.add('resolved');
+        const status = entry.querySelector('.report-resolution-status');
+        status.textContent = '対応済み';
+      }).catch(function () {
+        button.disabled = false;
+        button.textContent = '保存できませんでした。再度お試しください';
+      });
+    });
+  });
+</script>
 {% endblock %}

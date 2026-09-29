@@ -3,25 +3,155 @@
 {% block title %}管理者ログイン{% endblock %}
 
 {% block content %}
-<h2>管理者ログイン</h2>
-<p>指示ボード・避難所登録の利用には管理者権限が必要です。</p>
+<style>
+  body.auth-page {
+    margin: 0;
+    background: #eef3ef;
+    color: #203a37;
+    font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
+  }
 
-{% if error %}
-  <p>{{ message }}</p>
-{% endif %}
+  .auth-page > h1 {
+    margin: 0;
+    padding: 22px max(24px, calc((100% - 1280px) / 2));
+    background: #15564f;
+    color: #fff;
+    font-size: 23px;
+  }
 
-<form method="post">
-  <!-- リダイレクト先URLを保持 -->
-  {% if next %}
-    <input type="hidden" name="next" value="{{ next }}">
+  .auth-page nav {
+    display: flex;
+    min-height: 54px;
+    align-items: center;
+    gap: 28px;
+    padding: 0 max(24px, calc((100% - 1280px) / 2));
+    border-bottom: 1px solid #d6e1dc;
+    background: #fff;
+    color: #536864;
+    font-size: 14px;
+  }
+
+  .auth-page nav a {
+    color: #245b53;
+    text-decoration: none;
+  }
+
+  .auth-page hr {
+    display: none;
+  }
+
+  .auth-page .site-main {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 48px 24px;
+  }
+
+  .login-panel {
+    padding: 30px;
+    border: 1px solid #dce6e1;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 5px 18px rgb(29 66 58 / 5%);
+  }
+
+  .login-panel h2 {
+    margin: 0 0 10px;
+    font-size: 24px;
+  }
+
+  .login-description {
+    margin: 0 0 24px;
+    color: #536864;
+    line-height: 1.7;
+  }
+
+  .login-credentials {
+    margin-bottom: 24px;
+    padding: 16px 18px;
+    border-left: 4px solid #d89a4a;
+    background: #fbf5e9;
+    color: #674d2d;
+  }
+
+  .login-credentials p {
+    margin: 5px 0;
+  }
+
+  .login-form label {
+    display: inline-block;
+    margin-bottom: 7px;
+    font-weight: 700;
+  }
+
+  .login-form input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 44px;
+    padding: 9px 11px;
+    border: 1px solid #b8c9c2;
+    border-radius: 4px;
+    background: #fff;
+    color: #203a37;
+    font: inherit;
+  }
+
+  .login-form button {
+    min-height: 44px;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 4px;
+    background: #15564f;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .login-form button:hover {
+    background: #104740;
+  }
+
+  .login-error {
+    margin: 0 0 20px;
+    color: #a43832;
+  }
+
+  @media (max-width: 760px) {
+    .auth-page > h1 { padding: 18px 20px; }
+    .auth-page nav { gap: 16px; padding: 14px 20px; flex-wrap: wrap; }
+    .auth-page .site-main { padding: 28px 16px; }
+    .login-panel { padding: 22px; }
+  }
+</style>
+
+<section class="login-panel" aria-labelledby="loginHeading">
+  <h2 id="loginHeading">管理者ログイン</h2>
+  <p class="login-description">指示ボード・避難所登録の利用には管理者ログインが必要です。</p>
+
+  <div class="login-credentials" aria-label="ログイン情報">
+    <p><strong>ID:</strong> NTT123</p>
+    <p><strong>パスワード:</strong> toukai</p>
+  </div>
+
+  {% if error %}
+    <p class="login-error" role="alert">{{ message }}</p>
   {% endif %}
 
-  <p>
-    <label for="password">パスワード（「123」と入力してください）</label><br>
-    <input type="password" id="password" name="password" required>
-  </p>
+  <form class="login-form" method="post">
+    {% if next %}
+      <input type="hidden" name="next" value="{{ next }}">
+    {% endif %}
 
-  <p><button type="submit">ログイン</button></p>
-</form>
+    <p>
+      <label for="username">ID</label><br>
+      <input type="text" id="username" name="username" autocomplete="username" required>
+    </p>
+    <p>
+      <label for="password">パスワード</label><br>
+      <input type="password" id="password" name="password" autocomplete="current-password" required>
+    </p>
+    <p><button type="submit">ログイン</button></p>
+  </form>
+</section>
 
 {% endblock %}
